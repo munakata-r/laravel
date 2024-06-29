@@ -12,6 +12,7 @@
         @csrf
         @method('PUT')
         <div class="form-group">
+        <p><strong>商品ID:</strong> {{ $product->id}}</p>
             <label for="product_name">商品名 <span class="text-danger">*</span></label>
             <input type="text" name="product_name" class="form-control" id="product_name" value="{{ old('product_name', $product->product_name) }}" required>
         </div>
@@ -39,11 +40,11 @@
             <label for="image">商品画像</label>
             <input type="file" name="image" class="form-control-file" id="image">
             @if ($product->img_path)
-                <img src="{{ Storage::url($product->img_path) }}" alt="{{ $product->product_name }}" class="img-fluid mt-2">
+                <img src="{{ Storage::url($product->img_path) }}" alt="{{ $product->product_name }}" class="img-thumbnail mt-2" style="max-width: 300px;">
             @endif
         </div>
         <button type="submit" class="btn btn-warning">更新</button>
-        <a href="{{ route('products.index') }}" class="btn btn-secondary">戻る</a>
+        <a href="{{ route('products.show', $product->id) }}" class="btn btn-secondary">戻る</a>
     </form>
 </div>
 @endsection
