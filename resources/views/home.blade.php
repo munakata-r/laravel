@@ -3,17 +3,17 @@
 @section('content')
 <div class="container">
     <h1>商品一覧画面</h1>
-    <form action="{{ route('products.search') }}" method="POST" class="mb-3">
+    <form action="{{ route('products.index') }}" method="GET" class="mb-3">
         @csrf
         <div class="row">
             <div class="col-md-5">
-                <input type="text" name="product_name" class="form-control" placeholder="商品名で検索">
+                <input type="text" name="product_name" class="form-control" placeholder="商品名で検索" value="{{ old('product_name') }}">
             </div>
             <div class="col-md-5">
                 <select name="company_id" class="form-control">
                     <option value="">メーカー名で検索</option>
                     @foreach($companies as $company)
-                        <option value="{{ $company->id }}">{{ $company->company_name }}</option>
+                        <option value="{{ $company->id }}" {{ old('company_id') == $company->id ? 'selected' : '' }}>{{ $company->company_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -26,6 +26,12 @@
     @if (session('status'))
         <div class="alert alert-success" role="alert">
             {{ session('status') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -56,6 +62,7 @@
                 <td class="align-middle">{{ $product->company->company_name }}</td>
                 <td class="align-middle">
                     <a href="{{ route('products.show', $product->id) }}" class="btn btn-info">詳細</a>
+                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary">編集</a>
                     <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')

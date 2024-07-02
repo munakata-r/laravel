@@ -8,7 +8,11 @@
             {{ session('status') }}
         </div>
     @endif
-
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
     <div class="card mb-3">
         <div class="card-header">
             <h2>{{ $product->product_name }}</h2>
