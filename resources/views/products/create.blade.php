@@ -26,11 +26,11 @@
         @csrf
         <div class="form-group">
             <label for="product_name">商品名 <span class="text-danger">*</span></label>
-            <input type="text" name="product_name" class="form-control" id="product_name" value="{{ old('product_name') }}" required>
+            <input type="text" name="product_name" class="form-control" id="product_name" value="{{ old('product_name') }}">
         </div>
         <div class="form-group">
             <label for="company_id">メーカー名 <span class="text-danger">*</span></label>
-            <select name="company_id" class="form-control" id="company_id" required>
+            <select name="company_id" class="form-control" id="company_id">
                 @foreach($companies as $company)
                     <option value="{{ $company->id }}">{{ $company->company_name }}</option>
                 @endforeach
@@ -38,11 +38,11 @@
         </div>
         <div class="form-group">
             <label for="price">価格 <span class="text-danger">*</span></label>
-            <input type="number" name="price" class="form-control" id="price" value="{{ old('price') }}" required>
+            <input type="number" name="price" class="form-control" id="price" value="{{ old('price') }}">
         </div>
         <div class="form-group">
             <label for="stock">在庫数 <span class="text-danger">*</span></label>
-            <input type="number" name="stock" class="form-control" id="stock" value="{{ old('stock') }}" required>
+            <input type="number" name="stock" class="form-control" id="stock" value="{{ old('stock') }}" >
         </div>
         <div class="form-group">
             <label for="comment">コメント</label>

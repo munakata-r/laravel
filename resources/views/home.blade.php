@@ -62,7 +62,6 @@
                 <td class="align-middle">{{ $product->company->company_name }}</td>
                 <td class="align-middle">
                     <a href="{{ route('products.show', $product->id) }}" class="btn btn-info">詳細</a>
-                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary">編集</a>
                     <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
                         @csrf
                         @method('DELETE')
