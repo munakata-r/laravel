@@ -36,5 +36,4 @@ Route::get('/products/{id}/edit', [ProductController::class, 'edit'])->name('pro
 Route::put('/products/{id}', [ProductController::class, 'update'])->name('products.update');
 
 Route::resource('products', ProductController::class);
-Route::resource('products', ProductController::class);
 Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
