@@ -2,63 +2,79 @@
 
 @section('content')
 <div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Product List') }}</div>
-
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    <form action="{{ route('products.search') }}" method="POST">
-                        @csrf
-                        <div class="form-group">
-                            <label for="name">{{ __('Product Name') }}</label>
-                            <input type="text" name="name" class="form-control" id="name">
-                        </div>
-                        <div class="form-group">
-                            <label for="company_id">{{ __('Company') }}</label>
-                            <select name="company_id" class="form-control" id="company_id">
-                                <option value="">{{ __('Select a company') }}</option>
-                                @foreach($companies as $company)
-                                    <option value="{{ $company->id }}">{{ $company->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">{{ __('Search') }}</button>
-                    </form>
-
-                    <table class="table mt-4">
-                        <thead>
-                            <tr>
-                                <th>{{ __('Product Name') }}</th>
-                                <th>{{ __('Company') }}</th>
-                                <th>{{ __('Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($products as $product)
-                                <tr>
-                                    <td>{{ $product->name }}</td>
-                                    <td>{{ $product->company->name }}</td>
-                                    <td>
-                                        <form action="{{ route('products.destroy', $product->id) }}" method="POST">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger">{{ __('Delete') }}</button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
+    <h1>商品一覧画面</h1>
+    <form action="{{ route('products.index') }}" method="GET" class="mb-3">
+        @csrf
+        <div class="row">
+            <div class="col-md-5">
+                <input type="text" name="product_name" class="form-control" placeholder="商品名で検索" value="{{ old('product_name') }}">
+            </div>
+            <div class="col-md-5">
+                <select name="company_id" class="form-control">
+                    <option value="">メーカー名で検索</option>
+                    @foreach($companies as $company)
+                        <option value="{{ $company->id }}" {{ old('company_id') == $company->id ? 'selected' : '' }}>{{ $company->company_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary">検索</button>
             </div>
         </div>
+    </form>
+
+    @if (session('status'))
+        <div class="alert alert-success" role="alert">
+            {{ session('status') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert-danger" role="alert">
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="mb-3">
+        <a href="{{ route('products.create') }}" class="btn btn-success">新規作成</a>
+    </div>
+
+    <table class="table table-bordered table-striped w-100">
+        <thead>
+            <tr>
+                <th class="align-middle">ID</th>
+                <th class="align-middle">商品画像</th>
+                <th class="align-middle">商品名</th>
+                <th class="align-middle">価格</th>
+                <th class="align-middle">在庫数</th>
+                <th class="align-middle">メーカー名</th>
+                <th class="align-middle">アクション</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($products as $product)
+            <tr>
+                <td class="align-middle">{{ $product->id }}</td>
+                <td class="align-middle"><img src="{{ Storage::url($product->img_path) }}" alt="{{ $product->product_name }}" class="img-thumbnail" style="max-width: 100px;"></td>
+                <td class="align-middle">{{ $product->product_name }}</td>
+                <td class="align-middle">{{ $product->price }}</td>
+                <td class="align-middle">{{ $product->stock }}</td>
+                <td class="align-middle">{{ $product->company->company_name }}</td>
+                <td class="align-middle">
+                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-info">詳細</a>
+                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('本当に削除しますか？')">削除</button>
+                    </form>
+                </td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
+
+    <div class="d-flex justify-content-center">
+        {{ $products->appends(request()->input())->links() }}
     </div>
 </div>
 @endsection
