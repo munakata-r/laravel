@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Company;
-use Illuminate\Support\Facades\Storage;
-use Exception;
-use App\Http\Requests\ProductRequest;
 
 class ProductController extends Controller
 {
@@ -15,7 +12,6 @@ class ProductController extends Controller
     {
         $query = Product::query();
 
-        // 検索条件がある場合はクエリに追加
         if ($request->filled('product_name')) {
             $query->where('product_name', 'like', '%' . $request->product_name . '%');
         }
@@ -24,23 +20,35 @@ class ProductController extends Controller
             $query->where('company_id', $request->company_id);
         }
 
-        // 検索結果をページネーションで表示
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
+        }
+
+        if ($request->filled('stock_min')) {
+            $query->where('stock', '>=', $request->stock_min);
+        }
+
+        if ($request->filled('stock_max')) {
+            $query->where('stock', '<=', $request->stock_max);
+        }
+
         $products = $query->with('company')->paginate(10);
         $companies = Company::all();
 
-        $request->flash();
+        if ($request->ajax()) {
+            return view('products.partials.product_list', compact('products'))->render();
+        }
 
-        return view('home', compact('products', 'companies'));
+        return view('products.index', compact('products', 'companies'));
     }
 
     public function show($id)
     {
-        $product = Product::with('company')->find($id);
-
-        if (!$product) {
-            return redirect()->route('products.index')->with('status', 'Product not found');
-        }
-
+        $product = Product::with('company')->findOrFail($id);
         return view('products.show', compact('product'));
     }
 
@@ -50,90 +58,74 @@ class ProductController extends Controller
         return view('products.create', compact('companies'));
     }
 
-    public function store(ProductRequest $request)
+    public function store(Request $request)
     {
-        try {
-            $product = new Product();
-            $product->product_name = $request->product_name;
-            $product->company_id = $request->company_id;
-            $product->price = $request->price;
-            $product->stock = $request->stock;
-            $product->comment = $request->comment;
+        $request->validate([
+            'product_name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'company_id' => 'required|exists:companies,id',
+            'img_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
 
-            if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('public/images');
-                $product->img_path = $path;
-            }
+        $product = new Product;
+        $product->product_name = $request->product_name;
+        $product->price = $request->price;
+        $product->stock = $request->stock;
+        $product->company_id = $request->company_id;
 
-            $product->save();
-
-            return redirect()->route('products.index')->with('status', 'Product created successfully');
-        } catch (Exception $e) {
-            return back()->withErrors(['error' => 'Failed to create product: ' . $e->getMessage()]);
+        if ($request->hasFile('img_path')) {
+            $path = $request->file('img_path')->store('public/images');
+            $product->img_path = str_replace('public/', '', $path);
         }
+
+        $product->save();
+
+        return redirect()->route('products.index')->with('success', '商品が作成されました');
     }
 
     public function edit($id)
     {
-        $product = Product::find($id);
+        $product = Product::findOrFail($id);
         $companies = Company::all();
-
-        if (!$product) {
-            return redirect()->route('products.index')->with('status', 'Product not found');
-        }
-
         return view('products.edit', compact('product', 'companies'));
     }
 
-    public function update(ProductRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        try {
-            $product = Product::find($id);
+        $request->validate([
+            'product_name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'stock' => 'required|integer',
+            'company_id' => 'required|exists:companies,id',
+        ]);
 
-            if (!$product) {
-                return redirect()->route('products.index')->with('status', 'Product not found');
-            }
+        $product = Product::findOrFail($id);
+        $product->product_name = $request->product_name;
+        $product->price = $request->price;
+        $product->stock = $request->stock;
+        $product->company_id = $request->company_id;
 
-            $product->product_name = $request->product_name;
-            $product->company_id = $request->company_id;
-            $product->price = $request->price;
-            $product->stock = $request->stock;
-            $product->comment = $request->comment;
-
-            if ($request->hasFile('image')) {
-                if ($product->img_path) {
-                    Storage::delete($product->img_path);
-                }
-                $path = $request->file('image')->store('public/images');
-                $product->img_path = $path;
-            }
-
-            $product->save();
-
-            return redirect()->route('products.show', $product->id)->with('status', 'Product updated successfully');
-        } catch (Exception $e) {
-            return back()->withErrors(['error' => 'Failed to update product: ' . $e->getMessage()]);
+        if ($request->hasFile('img_path')) {
+            $path = $request->file('img_path')->store('public/images');
+            $product->img_path = str_replace('public/', '', $path);
         }
+
+        $product->save();
+
+        return redirect()->route('products.show', $product->id)->with('success', '商品情報が更新されました');
     }
 
     public function destroy($id)
     {
         try {
-            $product = Product::find($id);
-
-            if (!$product) {
-                return redirect()->route('products.index')->with('status', 'Product not found');
-            }
-
-            if ($product->img_path) {
-                Storage::delete($product->img_path);
-            }
-
+            $product = Product::findOrFail($id);
             $product->delete();
 
-            return redirect()->route('products.index')->with('status', 'Product deleted successfully');
-        } catch (Exception $e) {
-            return back()->withErrors(['error' => 'Failed to delete product: ' . $e->getMessage()]);
+            return response()->json(['message' => '削除が完了しました。'], 200);
+        } catch (\Exception $e) {
+            \Log::error('削除に失敗しました。', ['id' => $id, 'error' => $e->getMessage()]);
+            return response()->json(['error' => '削除に失敗しました。'], 500);
         }
     }
 }

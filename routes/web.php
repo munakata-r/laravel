@@ -37,3 +37,10 @@ Route::put('/products/{id}', [ProductController::class, 'update'])->name('produc
 
 Route::resource('products', ProductController::class);
 Route::post('/products/search', [ProductController::class, 'search'])->name('products.search');
+
+require __DIR__ .'/api.php';
+
+Route::delete('/items/{id}', [ItemController::class, 'destroy'])->name('items.destroy');
+
+
+
