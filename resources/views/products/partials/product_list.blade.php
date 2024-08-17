@@ -1,18 +1,25 @@
-<table class="table table-bordered table-striped w-100">
+<table id="myTable" class="table table-bordered table-striped">
     <thead>
         <tr>
-            <th class="align-middle"><a href="#" class="sort" data-sort="id">ID</a></th>
+            <!-- <th class="align-middle"><a href="#" class="sort" data-sort="id">ID</a></th>
             <th class="align-middle">商品画像</th>
             <th class="align-middle"><a href="#" class="sort" data-sort="product_name">商品名</a></th>
             <th class="align-middle"><a href="#" class="sort" data-sort="price">価格</a></th>
             <th class="align-middle"><a href="#" class="sort" data-sort="stock">在庫数</a></th>
             <th class="align-middle"><a href="#" class="sort" data-sort="company_name">メーカー名</a></th>
+            <th class="align-middle">アクション</th> -->
+            <th class="align-middle">ID</th>
+            <th class="align-middle">商品画像</th>
+            <th class="align-middle">商品名</th>
+            <th class="align-middle">価格</th>
+            <th class="align-middle">在庫数</th>
+            <th class="align-middle">メーカー名</th>
             <th class="align-middle">アクション</th>
         </tr>
     </thead>
     <tbody>
         @foreach($products as $product)
-        <tr id="product-row-{{ $product->id }}">
+        <tr>
             <td class="align-middle">{{ $product->id }}</td>
             <td class="align-middle">
                 @if ($product->img_path)
@@ -36,3 +43,22 @@
 <div class="d-flex justify-content-center">
     {{ $products->appends(request()->input())->links() }}
 </div>
+
+<script>
+    $(document).ready(function() {
+        // テーブルにTablesorterを適用
+        $("#myTable").tablesorter({
+            theme: 'default',
+            sortList: [[0, 1]], // 初期表示でIDを降順でソート
+        });
+    });
+    
+    $("#myTable").tablesorter({
+    headers: {
+        1: { sorter: false }, // 2番目のカラム（商品名）をソート不可にする
+        6: { sorter: false },
+    }
+});
+
+</script>
+
