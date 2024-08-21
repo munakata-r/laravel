@@ -107,33 +107,36 @@
             $('#search-form').submit(); // フォームを送信して検索をトリガー
         });
 
-        // 削除ボタンのクリックイベント
+        /$(document).ready(function() {
+        // 削除ボタンがクリックされたときの処理
         $(document).on('click', '.delete-btn', function(e) {
             e.preventDefault();
 
+            // 削除する商品のIDを取得
             var productId = $(this).data('product-id');
 
+            // 確認ダイアログ
             if (!confirm('本当に削除しますか？')) {
                 return;
             }
 
+            // Ajaxによる削除リクエスト
             $.ajax({
-                url: `/products/${productId}`,
-                method: 'DELETE',
+                url: `/products/${productId}`, // 削除対象のURL
+                method: 'POST', // POSTメソッドを使用
                 data: {
-                    _token: '{{ csrf_token() }}'
+                    _token: '{{ csrf_token() }}', // CSRFトークン
+                    _method: 'DELETE' // 実際にはDELETEメソッドとして処理
                 },
                 success: function(response) {
-                    console.log('削除が完了しました:', response);
+                    // 成功した場合、対象行を削除
+                    $(`#product-row-${productId}`).remove();
                     alert('削除が完了しました。');
-                    $(`#product-row-${productId}`).remove(); // テーブルの行を削除
                 },
                 error: function(xhr) {
-                    console.error('削除に失敗しました:', xhr);
-                    alert('削除に失敗しました: ' + xhr.responseJSON.error);
+                    alert('削除に失敗しました: ' + xhr.responseText);
                 }
             });
         });
     });
 </script>
-@endpush

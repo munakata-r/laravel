@@ -1,13 +1,7 @@
 <table id="myTable" class="table table-bordered table-striped">
     <thead>
         <tr>
-            <!-- <th class="align-middle"><a href="#" class="sort" data-sort="id">ID</a></th>
-            <th class="align-middle">商品画像</th>
-            <th class="align-middle"><a href="#" class="sort" data-sort="product_name">商品名</a></th>
-            <th class="align-middle"><a href="#" class="sort" data-sort="price">価格</a></th>
-            <th class="align-middle"><a href="#" class="sort" data-sort="stock">在庫数</a></th>
-            <th class="align-middle"><a href="#" class="sort" data-sort="company_name">メーカー名</a></th>
-            <th class="align-middle">アクション</th> -->
+            <!-- テーブルヘッダーの設定 -->
             <th class="align-middle">ID</th>
             <th class="align-middle">商品画像</th>
             <th class="align-middle">商品名</th>
@@ -19,7 +13,7 @@
     </thead>
     <tbody>
         @foreach($products as $product)
-        <tr>
+        <tr id="product-row-{{ $product->id }}"> <!-- 行にユニークIDを設定 -->
             <td class="align-middle">{{ $product->id }}</td>
             <td class="align-middle">
                 @if ($product->img_path)
@@ -44,21 +38,18 @@
     {{ $products->appends(request()->input())->links() }}
 </div>
 
+@push('scripts')
 <script>
     $(document).ready(function() {
         // テーブルにTablesorterを適用
         $("#myTable").tablesorter({
             theme: 'default',
             sortList: [[0, 1]], // 初期表示でIDを降順でソート
+            headers: {
+                1: { sorter: false }, // 商品画像のカラム（2番目）をソート不可にする
+                6: { sorter: false }  // アクションのカラム（7番目）をソート不可にする
+            }
         });
     });
-    
-    $("#myTable").tablesorter({
-    headers: {
-        1: { sorter: false }, // 2番目のカラム（商品名）をソート不可にする
-        6: { sorter: false },
-    }
-});
-
 </script>
-
+@endpush
