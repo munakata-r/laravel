@@ -107,7 +107,7 @@
             $('#search-form').submit(); // フォームを送信して検索をトリガー
         });
 
-        /$(document).ready(function() {
+    
         // 削除ボタンがクリックされたときの処理
         $(document).on('click', '.delete-btn', function(e) {
             e.preventDefault();
@@ -140,3 +140,4 @@
         });
     });
 </script>
+@endpush

@@ -41,7 +41,29 @@
 @push('scripts')
 <script>
     $(document).ready(function() {
-        // テーブルにTablesorterを適用
+        initializeTableSorter();
+
+        // 検索フォームの送信処理
+        $('#search-form').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+
+            $.ajax({
+                url: "{{ route('products.index') }}",
+                method: 'GET',
+                data: formData,
+                success: function(response) {
+                    $('#product-list').html(response);
+                    initializeTableSorter(); // テーブルを再生成した後にTablesorterを再適用
+                },
+                error: function(xhr) {
+                    alert('検索に失敗しました: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+
+    function initializeTableSorter() {
         $("#myTable").tablesorter({
             theme: 'default',
             sortList: [[0, 1]], // 初期表示でIDを降順でソート
@@ -50,6 +72,6 @@
                 6: { sorter: false }  // アクションのカラム（7番目）をソート不可にする
             }
         });
-    });
+    }
 </script>
 @endpush
