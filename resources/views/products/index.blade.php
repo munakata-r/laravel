@@ -53,29 +53,26 @@
             }
         });
 
+        // Tablesorterの初期化関数
+        function initializeTableSorter() {
+            $("#myTable").tablesorter({
+                theme: 'default',
+                sortList: [[0, 1]], // 初期表示でIDを降順でソート
+                headers: {
+                    1: { sorter: false }, // 商品画像のカラム（2番目）をソート不可にする
+                    6: { sorter: false }  // アクションのカラム（7番目）をソート不可にする
+                }
+            });
+        }
+
+        // 初期表示時のTablesorterの適用
+        initializeTableSorter();
+
         // 検索フォームの送信イベント
         $('#search-form').on('submit', function(e) {
             e.preventDefault();
 
-            const productName = $('#product_name').val();
-            const companyId = $('#company_id').val();
-            const priceMin = $('#price_min').val();
-            const priceMax = $('#price_max').val();
-            const stockMin = $('#stock_min').val();
-            const stockMax = $('#stock_max').val();
-            const sort = $('#sort').val(); // ソートパラメータ
-            const order = $('#order').val(); // ソート順序
-
-            const params = {
-                product_name: productName,
-                company_id: companyId,
-                price_min: priceMin,
-                price_max: priceMax,
-                stock_min: stockMin,
-                stock_max: stockMax,
-                sort: sort, // ソートパラメータを追加
-                order: order, // ソート順序を追加
-            };
+            const params = $(this).serialize(); // フォームデータをシリアライズ
 
             $.ajax({
                 url: "{{ route('products.index') }}",
@@ -83,6 +80,7 @@
                 data: params,
                 success: function(response) {
                     $('#product-list').html(response);
+                    initializeTableSorter(); // 検索結果のテーブルを再生成した後にTablesorterを再適用
                 },
                 error: function(xhr) {
                     console.error('検索に失敗しました:', xhr);
@@ -99,37 +97,30 @@
             const currentOrder = $(this).data('order'); // 現在のソート順序を取得
             const newOrder = currentOrder === 'asc' ? 'desc' : 'asc'; // ソート順序を切り替え
 
-            $(this).data('order', newOrder); // 新しいソート順序を設定
-
             $('#sort').val(sort); // フォームの隠しフィールドにソートパラメータを設定
             $('#order').val(newOrder); // フォームの隠しフィールドにソート順序を設定
 
             $('#search-form').submit(); // フォームを送信して検索をトリガー
         });
 
-    
         // 削除ボタンがクリックされたときの処理
         $(document).on('click', '.delete-btn', function(e) {
             e.preventDefault();
 
-            // 削除する商品のIDを取得
-            var productId = $(this).data('product-id');
+            const productId = $(this).data('product-id');
 
-            // 確認ダイアログ
             if (!confirm('本当に削除しますか？')) {
                 return;
             }
 
-            // Ajaxによる削除リクエスト
             $.ajax({
-                url: `/products/${productId}`, // 削除対象のURL
-                method: 'POST', // POSTメソッドを使用
+                url: `/products/${productId}`,
+                method: 'POST',
                 data: {
-                    _token: '{{ csrf_token() }}', // CSRFトークン
-                    _method: 'DELETE' // 実際にはDELETEメソッドとして処理
+                    _token: '{{ csrf_token() }}',
+                    _method: 'DELETE'
                 },
                 success: function(response) {
-                    // 成功した場合、対象行を削除
                     $(`#product-row-${productId}`).remove();
                     alert('削除が完了しました。');
                 },
